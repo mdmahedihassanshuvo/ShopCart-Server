@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(cors());
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.user_name}:${process.env.password}@cluster0.t8f7yaj.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -53,12 +53,29 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/addCart', async(req, res) => {
+        app.get('/addCart', async (req, res) => {
             const email = req.query.email;
-            const query = {email: email}
+            const query = { email: email }
             const result = await addToCartCollection.find(query).toArray();
             res.send(result);
         })
+
+        app.get('/addCart/:id', async (req, res) => {
+            try {
+                const id = req.params.id;
+                const query = { _id: id };
+                const result = await addToCartCollection.findOne(query);
+
+                if (!result) {
+                    return res.status(404).send("No matching document found.");
+                }
+
+                res.send(result);
+            } catch (err) {
+                console.error("Error fetching data:", err);
+                res.status(500).send("Internal Server Error");
+            }
+        });
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
