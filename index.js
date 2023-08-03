@@ -28,6 +28,7 @@ async function run() {
 
         const displayCollection = client.db("headphones").collection("display");
         const wiredCollection = client.db("headphones").collection("wiredHeadphone");
+        const wirelessCollection = client.db("headphones").collection("wirelessHeadphone");
 
         app.get('/display', async (req, res) => {
             const result = await displayCollection.find().toArray();
@@ -36,6 +37,11 @@ async function run() {
 
         app.get('/wired', async (req, res) => {
             const result = await wiredCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.get('/wireless', async (req, res) => {
+            const result = await wirelessCollection.find().toArray();
             res.send(result);
         })
 
