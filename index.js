@@ -29,6 +29,7 @@ async function run() {
         const displayCollection = client.db("headphones").collection("display");
         const wiredCollection = client.db("headphones").collection("wiredHeadphone");
         const wirelessCollection = client.db("headphones").collection("wirelessHeadphone");
+        const addToCartCollection = client.db("headphones").collection("addToCart");
 
         app.get('/display', async (req, res) => {
             const result = await displayCollection.find().toArray();
@@ -42,6 +43,20 @@ async function run() {
 
         app.get('/wireless', async (req, res) => {
             const result = await wirelessCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.post('/addCart', async (req, res) => {
+            const product = req.body;
+            const query = req.params.email
+            const result = await addToCartCollection.insertOne(product);
+            res.send(result);
+        })
+
+        app.get('/addCart', async(req, res) => {
+            const email = req.query.email;
+            const query = {email: email}
+            const result = await addToCartCollection.find(query).toArray();
             res.send(result);
         })
 
