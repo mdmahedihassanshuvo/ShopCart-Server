@@ -2,7 +2,9 @@ const express = require('express');
 const app = express();
 const cors = require('cors');
 require('dotenv').config()
+// const { ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 
 app.use(express.json());
 app.use(cors());
@@ -30,6 +32,7 @@ async function run() {
         const wiredCollection = client.db("headphones").collection("wiredHeadphone");
         const wirelessCollection = client.db("headphones").collection("wirelessHeadphone");
         const addToCartCollection = client.db("headphones").collection("addToCart");
+        const paymentCollection = client.db("headphones").collection("payments");
 
         app.get('/display', async (req, res) => {
             const result = await displayCollection.find().toArray();
@@ -94,7 +97,34 @@ async function run() {
             }
         });
 
-        
+        // payment request......................
+        app.post("/create-payment-intent", async (req, res) => {
+            const { price } = req.body;
+            const amount = parseFloat(price) * 100;
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                payment_method_types: ['card'],
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret
+            });
+        });
+
+        // payment related API
+
+        app.post('/payment', async (req, res) => {
+            const payment = req.body;
+            const result = await paymentCollection.insertOne(payment);
+
+            const query = { _id: (payment.cartItemId) }
+            // console.log(query)
+            const deletedItem = await addToCartCollection.deleteOne(query);
+
+            res.send({ result, deletedItem })
+        })
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
