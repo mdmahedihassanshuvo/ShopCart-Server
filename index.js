@@ -77,6 +77,25 @@ async function run() {
             }
         });
 
+        app.delete('/addCart/:id', async (req, res) => {
+            try {
+                const id = req.params.id;
+                const query = { _id: id };
+                const result = await addToCartCollection.deleteOne(query);
+
+                if (!result) {
+                    return res.status(404).send("No matching document found.");
+                }
+
+                res.send(result);
+            } catch (err) {
+                console.error("Error fetching data:", err);
+                res.status(500).send("Internal Server Error");
+            }
+        });
+
+        
+
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
