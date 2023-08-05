@@ -32,6 +32,7 @@ async function run() {
         const wiredCollection = client.db("headphones").collection("wiredHeadphone");
         const wirelessCollection = client.db("headphones").collection("wirelessHeadphone");
         const addToCartCollection = client.db("headphones").collection("addToCart");
+        const reviewCollection = client.db("headphones").collection("reviews");
         const paymentCollection = client.db("headphones").collection("payments");
 
         app.get('/display', async (req, res) => {
@@ -96,6 +97,12 @@ async function run() {
                 res.status(500).send("Internal Server Error");
             }
         });
+
+        // Testimonial ..........................
+        app.get('/review', async (req, res) => {
+            const result = await reviewCollection.find().toArray();
+            res.send(result);
+        })
 
         // payment request......................
         app.post("/create-payment-intent", async (req, res) => {
